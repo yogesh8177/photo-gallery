@@ -1,0 +1,72 @@
+﻿@{
+    Page.Title="Search";
+
+   
+    IEnumerable<dynamic> result = null;
+
+    if(IsPost){
+        var db = Database.Open("Photos");
+
+        var department = Request.Form["Department"];
+        var year = Request.Form["Year"];
+        var eventT = Request.Form["Event"];
+
+        if(department.IsEmpty() && year.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Event LIKE @0","%"+eventT+"%");
+        }else if(year.IsEmpty() && eventT.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Department = @0",department);
+        }else if(department.IsEmpty() && eventT.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Year LIKE @0",year);
+        }else if(department.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Event LIKE @0 AND Year=@1","%"+eventT+"%",year);
+        }else if(year.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Event LIKE @0 AND Department=@1","%"+eventT+"%",department);
+        }else if(eventT.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Year = @0 AND Department=@1",year,department);
+        }else if(!department.IsEmpty() && !year.IsEmpty() && !eventT.IsEmpty()){
+            result = db.Query("Select Name from Gallery WHERE Year = @0 AND Department=@1 AND Event LIKE @2",year,department,"%"+eventT+"%");
+        }
+        
+    }
+}
+
+<div class="bg-black bg-padded">
+    <form method="post" action="">
+         <select name="Department" class="form-control">
+            <option value="">Department</option>
+            <option value="Computer">Computer</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Electronics and Telecommunication">Electronics and Telecommunication</option>
+            <option value="Civil">Civil</option>
+             <option value="Other">Other</option>
+        </select>
+        
+        <select name="Year" class="form-control">
+            <option value="">Year</option>
+            <option value="FE">FE</option>
+            <option value="SE">SE</option>
+            <option value="TE">TE</option>
+            <option value="BE">BE</option>
+            <option value="Other">Other</option>
+        </select>
+         <input type="text" name="Event" placeholder="Event" class="form-control">
+        <input type="submit" value="Search" class="btn btn-default">
+    </form>
+
+    @if(IsPost){
+        <h1>Gallery</h1><hr>
+        <ul class="thumb">
+        @if(result!=null){
+            foreach(var data in result){
+            <li class="image-container">
+                <a href="~/Shared/ViewGallery.cshtml/@data.Name">
+                <img src="~/Photos/@data.Name/Thumb/thumb.jpeg" alt="no image" title="@data.Name" class="img-thumbnail"></a>
+                <div class="gallery-label">@data.Name</div>             
+            </li>
+            }
+        }
+        
+        </ul>
+    }
+
+</div>

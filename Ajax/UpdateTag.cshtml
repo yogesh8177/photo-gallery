@@ -1,0 +1,20 @@
+﻿@{
+    if(IsPost && Roles.IsUserInRole("admin")){     
+        
+        var id = Request.Form["Id"];
+        var tag = Request.Form["Tag"];
+
+        if(!tag.IsEmpty()){
+            var db = Database.Open("Photos"); 
+            db.Execute("Update Image Set Tags=@0 WHERE Id=@1",tag,id);
+            Response.Write("Tag updated");
+            Response.End();
+        }else{
+            Response.Write("Invalid tag.");
+            Response.End();
+        }
+        
+      
+    }
+}
+

@@ -1,0 +1,28 @@
+﻿@{
+    Page.Title="Delete Gallery";
+
+    var id = UrlData[0];
+    var name = HttpUtility.UrlDecode(UrlData[1]);
+
+    if(IsPost && Roles.IsUserInRole("admin")){
+        var db = Database.Open("Photos");
+        db.Execute("DELETE FROM Image WHERE GalleryId = @0",id);
+        db.Execute("DELETE FROM Gallery WHERE Id = @0",id);
+        if(Directory.Exists(Server.MapPath("~/Photos/"+name))){
+            Directory.Delete(Server.MapPath("~/Photos/"+name),true);
+            Response.Redirect("~/Default");
+        }
+    }else{
+        Response.Write("Access denied!");
+    }
+}
+
+<div>
+    <form method="post" action="">
+            <p>Are you sure you want to delete @name?</p>
+            <input type="submit" value="Delete">
+            
+    </form>
+</div>
+        
+ 

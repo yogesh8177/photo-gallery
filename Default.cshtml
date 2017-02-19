@@ -1,0 +1,35 @@
+﻿@{
+    Page.Title="Photos Gallery";
+    Page.Description="Create and share your photos";
+
+    var msg = "";
+    var db = Database.Open("Photos");
+    var gallaries = db.Query("Select * FROM Gallery");
+    if(gallaries.Count()!=0){
+        
+    }else{
+        msg="No gallery present.";
+    }
+}
+
+<div class="bg-black">
+    <h1>Gallery</h1>
+    <ul class="thumb">
+        @foreach(var data in gallaries){
+            <li class="image-container">               
+                    <a href="~/Shared/ViewGallery.cshtml/@data.Name">
+                    <img src="~/Photos/@data.Name/Thumb/thumb.jpeg" alt="no image" title="@data.Name - @data.Event, @data.Year, @data.Department" class="img-thumbnail"></a>  
+                   <div class="gallery-label">@{//If length of name exceeds 14 characters...
+                                                string name = data.Name; 
+                                                if(name.Length>12){
+                                                    <span>@name.Substring(0,12)..</span>
+                                                  }else{
+                                                      <span>@name</span>
+                                                  }
+                                               }
+                   </div>                                                           
+            </li>
+        }
+    </ul>
+    <br>
+</div>

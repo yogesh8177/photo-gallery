@@ -1,0 +1,41 @@
+﻿@{
+    Layout="";
+}
+<!DOCTYPE>
+<html lang="en">
+    <head>
+        <title>Modal</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <link rel="stylesheet" href="~/Content/StyleSheet.css" type="text/css">
+        <script>
+
+            $(document).ready(function () {
+                $(".view").click(function () {
+                    $("#img-modal").css("display", "block");
+                });
+                $(".img-close").click(function(){
+                    $("#img-modal").css("display", "none");
+                });
+                $("a.view").click(function (e) {
+                    e.preventDefault();
+                });
+            });
+            
+        </script>
+    </head>
+    <body>
+        
+        <img src="~/Photos/JavaFX/REL-Android04499f38-e24e-43a3-a7dd-51fa3c826576.png"  alt="no image">
+        <a href="#" class="view">View</a>
+        <div id="img-modal">
+            <div class="img-content">
+                <div class="img-header"><span class="img-close"><a href="#">X</a></span><h1>Hello</h1></div>
+                <div class="img-content">
+                    <img src="~/Photos/JavaFX/REL-Android04499f38-e24e-43a3-a7dd-51fa3c826576.png"  alt="no image">                    
+                </div>
+                <div class="img-footer"></div>
+            </div>
+        </div>
+    
+    </body>
+</html> 

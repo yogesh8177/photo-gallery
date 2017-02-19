@@ -1,0 +1,44 @@
+﻿@{
+    Page.Title="View Image";
+
+    var id = UrlData[0];
+
+    var db = Database.Open("Photos");
+    var image = db.QuerySingle("Select * FROM Image Where Id = @0",id);
+    var status="";
+    var gallery = db.QueryValue("Select Name FROM Gallery Where Id=@0",image.GalleryId);
+
+    if(IsPost && Roles.IsUserInRole("admin")){      
+        var tag = Request.Form["Tag"];
+        db.Execute("Update Image Set Tags=@0 WHERE Id=@1",tag,id);
+        status="Tag updated";
+         image = db.QuerySingle("Select * FROM Image Where Id = @0",id);
+      
+    }
+}
+
+<div class="bg-black text-center">
+    <h1>@gallery</h1>
+     @if(Roles.IsUserInRole("admin"))
+        {
+            <form method="post" action="">
+                <input type="text" name="Tag" class="form-control text-center" placeholder="Tag image" value="@image.Tags">
+                <input type="submit" value="Update tag" class="btn btn-default">
+            </form>
+                  
+        }else{
+            <label>Tag:</label> @image.Tags
+        }
+    @if(IsPost){
+            @status
+        }
+    <br>
+    
+    <img src="@HttpUtility.UrlDecode(@Href(image.URL+image.FileName))" alt="no image" class="img-responsive center-block"><hr>
+    <div><label>Size:</label> @{var size= image.Size/1024;}@size KB <br>
+    <!--<label>Share link</label><input type="text" readonly="true" value="http://@Request.Url.Host@Href(image.URL)" class="form-control text-center"> </p>--> 
+     @if(Roles.IsUserInRole("admin")){<a href="~/Admin/DeleteImage/@image.Id/@gallery">[ Delete ]</a>}
+        
+    </div>
+    <hr>
+</div>

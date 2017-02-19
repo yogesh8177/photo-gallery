@@ -1,0 +1,159 @@
+﻿@{
+
+    //var gallery = HttpUtility.UrlDecode(UrlData[0]);
+    var gallery = "Days";
+    Page.Title="View - "+gallery;
+    var db = Database.Open("Photos");
+
+    var tag = Request.QueryString["Tag"];
+
+    var Details = db.QuerySingle("Select * FROM Gallery WHERE Name =@0",gallery);
+    IEnumerable<dynamic> images=null;
+    if(tag.IsEmpty()){
+        images = db.Query("Select * FROM Image WHERE GalleryId = @0  ORDER By DateTime DESC",Details.Id);
+    }else{
+         images = db.Query("Select * FROM Image WHERE GalleryId = @0 AND Tags LIKE @1  ORDER By DateTime DESC",Details.Id, "%"+tag+"%");
+    }
+    var count=images.Count();
+ 
+}
+<br>
+<style>
+    #myModal{
+        color: #000;
+    }
+</style>
+<script>
+
+    function postHeightMessage() {
+        var actual_height = document.getElementById('content').scrollHeight;
+        parent.postMessage(actual_height + 50, "*");
+    }
+    window.onload = function () {
+        var isChrome = /Chrome/.test(navigator.userAgent);
+        var isSafari = /Safari/.test(navigator.userAgent);
+        if (isChrome || isSafari) {
+            parent.postMessage(200, "*");
+        }
+
+        // Send actual iframe height 
+        setTimeout(postHeightMessage, 100);
+    }
+
+    $(document).ready(function () {
+        var scrollPos;
+
+        $(document).on("scroll", function () {
+            scrollPos = $(document).scrollTop();
+        });
+
+        $("a.view").click(function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        $(".view").on('click', function (e) {
+            var url = "";
+            var deleteUrl = "";
+            var size = 0;
+            var id = "";
+            var tag = "";
+            ;
+            scrollPos = $(window).scrollTop();
+            url = $(this).data("url");
+            deleteUrl = $(this).data("delete-id");
+            size = $(this).data("size");
+            id = $(this).data("id");
+            tag = $(this).data("tag");
+            $("#img-modal img").attr("src", url);
+            $("#delete").attr("href", deleteUrl);
+            $("#img-modal").find(".img-tag").append(tag);
+            $("#tag").data("id", id);
+            $(".img-tag").append(" (" + parseInt((size / 1024)) + " KB)");
+            $("body").css("overflow", "hidden");
+            $("#img-modal").css("display", "block");
+
+        });
+
+        $(".img-close").click(function () {
+            $("#img-modal").css("display", "none");
+            $("body").css("overflow", "auto");
+            $(".img-tag").html("");
+            $("html,body").animate({scrollTop: scrollPos},'slow');
+        });
+
+        $("#delete").click(function () {
+            window.location.href = $(this).attr("href");
+        });
+
+        $("#update").click(function () {
+            var tag = $("#tag").val();
+            var tid = $("#tag").data("id");
+            if (tag === "") {
+                alert("Enter some tag name")
+            } else {
+                $.post("/Ajax/UpdateTag.cshtml",
+                    { Tag: tag,
+                        Id: tid
+                    },
+                    function (data) {
+
+                        $(".img-tag").append(" " + data);
+                    }); //post ends
+            }
+
+        });
+    });
+</script>
+ 
+<div class="bg-black" id="content">
+    <a href="#search" data-toggle="collapse" class="btn btn-default">more...</a><hr>
+    <div class="collapse" id="search">
+        <p class="text-justify"><b>Event: </b>@Details.Event</p>
+        <hr>
+        <p class="text-justify"><b>Description: </b>@Details.Description</p>
+        <hr>
+        <form method="get" action="">
+            <input type="search" name="Tag" placeholder="Enter tag to search image" class="form-control">
+            <input type="submit" value="Search" class="btn btn-default">
+        </form>
+        @if(Roles.IsUserInRole("admin")){<span> <a href="~/Admin/ImageUpload?gallery=@gallery">Upload images</a>
+         <a href="~/Admin/EditGallery/@Details.Id">[ Edit ]</a>&nbsp;
+         <a href="~/Admin/DeleteGallery.cshtml/@Details.Id/@Details.Name">[ Delete ]</a>
+         </span>}
+    </div>
+<br>
+    <div >
+        <h1 class="text-center">@gallery - @count images</h1>
+    <ul class="thumb">
+        
+        @foreach(var data in images){
+          
+            <li class="image-container">
+              <!--<a href="~/Shared/ViewImage.cshtml/@data.id"><img src="@HttpUtility.UrlDecode(@Href("~/Photos/"+gallery+"/Thumb/"+data.FileName))" alt="no image" class="img-thumbnail" title="@data.Tags" ></a> -->  
+                <a href="#" data-size="@data.Size" data-id="@data.Id" data-delete-id="/Admin/DeleteImage/@data.Id/@gallery" data-tag="@data.Tags" data-url="/Photos/@gallery/@data.FileName" class="view"><img src="@HttpUtility.UrlDecode(@Href("~/Photos/"+gallery+"/Thumb/"+data.FileName))" alt="no image" class="img-thumbnail" title="@data.Tags" ></a>  
+                                         
+            </li>
+        }
+    
+    </ul>
+    </div>
+    
+    <br>
+
+   
+</div>
+ <div id="img-modal">
+            <div class="img-header"><span class="img-close"><a href="#">X</a></span></div>
+            <div class="img-content">
+                
+                <div class="img-tag"></div>
+                @if(Roles.IsUserInRole("admin")){<span><input class="img-tag" id="tag" type="text" name="Tag"> <input id="update" type="submit" value="Update"></span>}
+                <div class="img-image"><img src="#"  alt="no image"></div>
+                <div class="img-footer">
+                    @if(Roles.IsUserInRole("admin")){
+                        <a id="delete" class="btn btn-default" data-dismiss="modal" href="#">Delete</a>
+                    }
+                </div>
+            </div>
+</div>

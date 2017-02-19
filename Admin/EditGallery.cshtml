@@ -1,0 +1,67 @@
+﻿@{
+    Page.Title="Edit Gallery";
+    var id = UrlData[0];
+    var status="";
+    var db = Database.Open("Photos");
+    var Details = db.QuerySingle("SELECT * FROM Gallery WHERE Id=@0",id);
+
+    //Validation.Add("Name", Validator.Required("Must enter gallery name."));
+    Validation.Add("Department", Validator.Required("Must select department name."));
+    Validation.Add("Year", Validator.Required("Must select year."));
+
+    if(IsPost && Validation.IsValid()){
+        
+       // var name = Request.Form["Name"];
+        var oldname = Request.Form["OldName"];
+        var description = Request.Form["Description"];
+        var department = Request.Form["Department"];
+        var year = Request.Form["Year"];
+        var eventT = Request.Form["Event"];
+
+        /*if(Directory.Exists(Server.MapPath("~/Photos/"+oldname))){
+            try{
+                Directory.Move(Server.MapPath("~/Photos/"+oldname),Server.MapPath("~/Photos/"+name));
+            }catch(Exception e){
+                status = e.Message;
+            }
+            
+        }*/
+            //var url = "~/Photos/"+name+"/";
+            db.Execute("UPDATE Gallery SET Description=@0, Year=@1, Department=@2, Event=@3, Modified=@4 WHERE Id=@5",description,year,department,eventT,DateTime.Now,id);
+           // db.Execute("UPDATE Image Set URL=@0 WHERE GalleryId=@1",url,id);
+            status="Successfully updated!";
+        Details =null;
+        Details = db.QuerySingle("SELECT * FROM Gallery WHERE Id=@0",id);
+    }
+}
+
+<div class="well">
+    @Html.ValidationSummary()
+    <form method="post" action="">
+       <h1>@Details.Name</h1> 
+        <!--<input type="text" value="@Details.Name" name="Name" placeholder="Gallery name" class="form-control">-->
+        <input type="hidden" name="OldName" value="@Details.Name">
+        <textarea name="Description" placeholder="Description" class="form-control">@Details.Description</textarea>
+        <select name="Department" required class="form-control">
+            <option value="@Details.Department">@Details.Department</option>
+            <option value="Computer">Computer</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Electronics and Telecommunication">Electronics and Telecommunication</option>
+            <option value="Civil">Civil</option>
+             <option value="Other">Other</option>
+        </select>
+        
+        <select name="Year" required class="form-control">
+            <option value="@Details.Year">@Details.Year</option>
+            <option value="FE">FE</option>
+            <option value="SE">SE</option>
+            <option value="TE">TE</option>
+            <option value="BE">BE</option>
+             <option value="Other">Other</option>
+        </select>
+        <input type="text" value="@Details.Event" name="Event" placeholder="Event" class="form-control"> <br>
+        <input type="submit" value="Update" class="btn btn-default">
+    
+    </form>
+    <div class="alert alert-success">@status</div>
+</div>

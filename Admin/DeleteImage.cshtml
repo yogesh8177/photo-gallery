@@ -1,0 +1,28 @@
+﻿@{
+    Page.Title="Delete Image";
+
+    var id = HttpUtility.UrlDecode(UrlData[0]);
+    var gallery = HttpUtility.UrlDecode(UrlData[1]);
+
+    if(IsPost){
+        var db = Database.Open("Photos");
+        var image = db.QuerySingle("SELECT URL, FileName FROM Image WHERE Id = @0",id);
+        var imagePath = image.URL+image.FileName;
+        db.Execute("DELETE FROM Image WHERE Id = @0",id);
+        if(File.Exists(Server.MapPath(imagePath))){
+            File.Delete(Server.MapPath(imagePath));
+            File.Delete(Server.MapPath("~/Photos/"+gallery+"/Thumb/"+Path.GetFileName(imagePath)));
+            Response.Redirect("~/Shared/ViewGallery.cshtml/"+gallery);
+        }
+    }
+}
+
+<div>
+    <form method="post" action="">
+            <p>Are you sure?</p>
+            <input type="submit" value="Delete">
+            
+    </form>
+</div>
+        
+ 

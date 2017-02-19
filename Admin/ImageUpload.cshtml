@@ -1,0 +1,76 @@
+﻿@{
+    var gallery = Request.QueryString["gallery"];
+     Page.Title="Image Upload - "+gallery;
+
+     var status="";
+    if(IsPost){
+            if(Request.Files.Count > 0){
+                
+                for(int i=0;i<Request.Files.Count; i++){
+                  
+                var file = Request.Files[i];
+                var fileName = Path.GetFileNameWithoutExtension(file.FileName);
+                var extension = Path.GetExtension(file.FileName);
+                var contentType = file.ContentType;
+                var size = file.ContentLength;
+                byte[] imageBytes = new byte[size];
+                file.InputStream.Read(imageBytes,0,size);
+                WebImage image = new WebImage(imageBytes);
+                //if image is too large, resize and re-calculate size
+                if(image.Width > 960 && image.Height > 720){
+                        image.Resize(960,720,true);
+                        byte[] newBytes = image.GetBytes();
+                        size = newBytes.Count();
+                   }
+                //if file is image, then save it
+                if(contentType.StartsWith("image/")){
+                    //if directory does not exist, create new one
+                    var saveFolder = Server.MapPath("~/Photos/"+gallery);
+                    if(!Directory.Exists(saveFolder)){
+                        Directory.CreateDirectory(saveFolder);
+                        Directory.CreateDirectory(saveFolder+"/Thumb");
+                    }
+                    var guid = Guid.NewGuid().ToString();
+                    var savePath = "~/Photos/"+gallery+"/";
+                    var db = Database.Open("Photos");
+                    var id = db.QueryValue("SELECT Id FROM Gallery WHERE Name = @0",gallery);
+                    db.Execute("INSERT INTO Image (Tags, URL, GalleryId, DateTime, Size, FileName) VALUES(@0,@1,@2,@3,@4,@5)","No tag",savePath,id, DateTime.Now,size, fileName+guid+extension);
+                    //file.SaveAs(Server.MapPath(savePath));
+                    
+                    image.Save(savePath+fileName+guid+extension);
+                    //Create a thumbnail image.
+                    
+                    image.Resize(120,120,true);
+                    image.Save(Server.MapPath("~/Photos/"+gallery+"/thumb/"+fileName+guid+extension));
+                    if(i == Request.Files.Count-1){
+                        //image.AddTextWatermark(gallery,"White",12,"bold");
+                        image.Save(Server.MapPath("~/Photos/"+gallery+"/Thumb/thumb.jpeg"));
+                    }
+                    
+                    status = "Upload successful.";
+                }else{
+                    ModelState.AddFormError("Select image file to upload.");
+                }
+            }
+        }else{
+            ModelState.AddFormError("Select file to upload.");
+        }
+    }
+    
+    
+}
+
+<div class="well">
+   @Html.ValidationSummary()
+   
+        <form method="post" action="" enctype="multipart/form-data">
+            <input type="file" name="Image" accept="image/*" multiple class="form-control"><br>
+            <input type="submit"  value="Upload" class="btn btn-default">       
+        </form><hr>
+    <a href="~/Shared/ViewGallery.cshtml/@gallery">View gallery</a>
+    @if(IsPost){
+        @status
+    }
+</div>
+       
+

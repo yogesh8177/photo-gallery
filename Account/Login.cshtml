@@ -1,0 +1,28 @@
+﻿@{
+    
+    Validation.Add("Username", Validator.Required("Enter username."));
+    Validation.Add("Password", Validator.Required("Enter password."));
+
+    if(IsPost && Validation.IsValid()){
+        var username = Request.Form["Username"];
+        var password = Request.Form["Password"];
+        bool success = WebSecurity.Login(username,password,false);
+
+        if(success){
+            Response.Redirect("~/Default");
+        }else{
+            ModelState.AddFormError("Invalid login details.");
+        }
+    }
+   
+}
+<br>
+<div class="bg-black">
+    @Html.ValidationSummary()
+    <form method="post" action="">
+        <input type="text" name="Username" placeholder="User name" required class="form-control">
+        <input type="password" name="Password" required class="form-control">
+        <input type="submit" value="Login" class="btn btn-default">
+    </form>
+
+</div>

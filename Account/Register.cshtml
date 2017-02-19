@@ -1,0 +1,41 @@
+﻿@{
+    Page.Title="Register";
+
+    Validation.Add("Username",Validator.Required("Enter username."));
+    Validation.Add("Password",Validator.Required("Enter password."));
+    Validation.Add("Confirm", Validator.EqualsTo("Password","Passwords do not match."));
+
+    if(IsPost && Validation.IsValid()){
+        var Username = Request.Form["Username"];
+        var Password = Request.Form["Password"];
+
+        var db = Database.Open("Photos");
+        var user = db.QueryValue("Select Email FROM UserProfiles WHERE Email=@0",Username);
+        if(user==null){
+            db.Execute("INSERT INTO UserProfiles (Email) VALUES(@0)",Username);
+
+            try{
+                WebSecurity.CreateAccount(Username,Password,false);
+            }catch(MembershipCreateUserException e){
+                ModelState.AddFormError(e.Message);
+            }
+            
+        }else{
+            ModelState.AddFormError("User already registered.");
+        }
+        
+    }
+}
+
+ <div>
+     @Html.ValidationSummary()
+    <form method="post" action="">
+            <input type="text" name="Username" placeholder="User name" required class="form-control">
+            <input type="password" name="Password" required class="form-control">
+            <input type="password" name="Confirm" required class="form-control">
+            <input type="submit" value="Register" class="btn btn-default">
+        
+     </form>
+
+ </div>
+        

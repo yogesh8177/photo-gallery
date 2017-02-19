@@ -1,0 +1,50 @@
+﻿@{
+    
+}
+
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>@Page.Title</title>
+        <link rel="stylesheet" href="~/Content/StyleSheet.css" type="text/css">
+        <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.1/jquery-ui.min.js"></script>
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+        <!-- jQuery library -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+        <!-- Latest compiled JavaScript -->
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div id="Header-mobile">
+                                      
+                <a href="#menu" data-toggle="collapse" class="btn btn-primary">Photos Menu</a>
+                <br>
+                <ul id="menu" class="collapse">
+                  <li><a href="~/Default">Galleries</a></li>
+                  <li><a href="~/Shared/Search">Search</a></li>
+                  <li><a href="~/Admin/CreateGallery">Create</a></li>
+                  @if(!WebSecurity.IsAuthenticated){
+                      <!--<li><a href="~/Account/Register">Register</a></li>-->
+                      <li><a href="~/Account/Login">Login</a></li>
+                   }else{
+                       <li><a href="~/Account/Logout">Logout</a></li>
+                   }
+                  
+                </ul>
+              </div>
+          
+
+        <div class="container">
+            @RenderBody()
+        </div>
+        <hr>
+        <div id="Footer" class="footer">
+           <label>Photos &copy;</label> @DateTime.Now.Year
+        </div>
+    </body>
+</html>

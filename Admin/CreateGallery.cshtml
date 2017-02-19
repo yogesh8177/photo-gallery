@@ -1,0 +1,63 @@
+﻿@{
+    Page.Title="Create Gallery";
+
+    Validation.Add("Name", Validator.Required("Must enter gallery name."));
+    Validation.Add("Department", Validator.Required("Must select department name."));
+    Validation.Add("Year", Validator.Required("Must select year."));
+
+    var status="";
+    var name="";
+
+    if(IsPost && Validation.IsValid()){
+
+        name = Request.Form["Name"];
+        var description = Request.Form["Description"];
+        var department = Request.Form["Department"];
+        var year = Request.Form["Year"];
+        var eventT = Request.Form["Event"];
+
+        var db = Database.Open("Photos");
+        var gallery = db.QueryValue("SELECT Name FROM Gallery Where Name = @0",name);
+        if(gallery!=null){
+            ModelState.AddFormError("Gallery with same name exists, enter a new unique name.");
+        }else{
+            db.Execute("INSERT INTO Gallery (Name, Description, DateTime, Year, Department, Event) VALUES(@0,@1,@2,@3,@4,@5)", name,description,DateTime.Now,year,department,eventT);
+            status = "success";
+        }
+        
+    }
+    
+
+}
+
+<div>
+    @Html.ValidationSummary()
+    <form method="post" action="">
+        <input type="text" name="Name" required placeholder="Gallery name" class="form-control"> 
+        <textarea name="Description" placeholder="Description" class="form-control"> </textarea>
+        <select name="Department" required class="form-control">
+            <option value="">Department</option>
+            <option value="Computer">Computer</option>
+            <option value="Mechanical">Mechanical</option>
+            <option value="Electronics and Telecommunication">Electronics and Telecommunication</option>
+            <option value="Civil">Civil</option>
+            <option value="Other">Other</option>
+        </select>
+        
+        <select name="Year" required class="form-control">
+            <option value="">Year</option>
+            <option value="FE">FE</option>
+            <option value="SE">SE</option>
+            <option value="TE">TE</option>
+            <option value="BE">BE</option>
+            <option value="Other">Other</option>
+        </select>
+        <input type="text" name="Event" placeholder="Event" class="form-control"> <br>
+        <input type="submit" value="Create" class="btn btn-default">
+    </form>
+
+    @if(IsPost && status.Equals("success")){
+        <p>Gallery created successfully. <a href="~/Admin/ImageUpload?gallery=@name">Upload images</a></p>
+    }
+
+</div>
